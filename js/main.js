@@ -17,8 +17,8 @@ function init() {
 	
 	Master.player = 
 		Object({
-			x: Master.grid.center,
-			y: Master.grid.center,
+			x: Math.round(Master.grid.center / 2),
+			y: Math.round(Master.grid.center / 2),
 			z: 10,
 			type: "pyramid",
 			colour: "FFFF00",

@@ -8,7 +8,7 @@ var Camera = function(grid) {
 		
 		size: 0,
 		cubeSize: 0,
-		zoomLevel: 13,
+		zoomLevel: 17,
 		rotation: 0,
 		
 		focus: null,
@@ -132,7 +132,7 @@ var Camera = function(grid) {
 				time.stop("camera.update.findscope");
 				
 				if (this.addShadows) {
-					time.start("camera.update.addshadows");
+					time.start("camera.update.addShadows");
 					
 					var shadows = [];
 					
@@ -174,7 +174,7 @@ var Camera = function(grid) {
 					
 					shadows = [];
 					
-					time.stop("camera.update.addshadows");
+					time.stop("camera.update.addShadows");
 				}
 			//}
 		
