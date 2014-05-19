@@ -1,3 +1,6 @@
+// COMMON FUNCTIONS
+
+// Random number generator
 function random(r1, r2, r3) {
 	var min      = 0;
 	var max      = 0;		
@@ -26,6 +29,8 @@ function random(r1, r2, r3) {
 	return result;
 };
 
+
+// Create a cloned copy of an object
 function clone(obj) {
 	time.start("clone");
 	
@@ -42,6 +47,8 @@ function clone(obj) {
 	return copy;
 }
 
+
+// Combine a RRGGBB colour string and 0-1 opacity integer
 function combineColourOpacity(colour, opacity) {
 	time.start("combineColourOpacity");
 	
@@ -57,7 +64,8 @@ function combineColourOpacity(colour, opacity) {
 	return result;
 }
 
-// shim layer with setTimeout fallback
+
+// Shim layer for requestAnimationFrame with setTimeout fallback
 window.requestAnimFrame = (function(){
 	return  window.requestAnimationFrame       ||
 	window.webkitRequestAnimationFrame ||
