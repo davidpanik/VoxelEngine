@@ -1,7 +1,7 @@
 // https://github.com/nosir/obelisk.js
 
-// TODO Comment code
-// TODO Make blocks in front of player opaque
+// TODO Comment code (just main.js now)
+// TODO Make blocks in front of player transparent
 // TODO Get rid of Master.* 
 // TODO No player shadow?
 
@@ -33,8 +33,9 @@ function init() {
 	Controls();
 	
 	PopulateGrid
-	.addFloor(Master.grid)
-	.fromMap(Master.grid, map);
+	.diamondSquare(Master.grid);
+	//.addFloor(Master.grid)
+	//.fromMap(Master.grid, map);
 	//PopulateGrid.random(Master.grid);
 	//PopulateGrid.landscape(Master.grid);
 	
@@ -121,6 +122,115 @@ var PopulateGrid = {
 		//for (var counter = 0; counter < 600; counter++) {
 			//addColumn(random(grid.size), random(grid.size), random(1, 4));
 		//}
+		
+		Pause.off();
+		
+		return this;
+	},
+	
+	diamondSquare: function(grid) {
+		Pause.on();
+		
+		function Terrain() {
+			this.size = grid.size;
+			this.max = this.size - 1;
+			this.map = new Float32Array(this.size * this.size);
+		}
+		
+		Terrain.prototype.get = function(x, y) {
+			if (x < 0 || x > this.max || y < 0 || y > this.max) return -1;
+			return this.map[x + this.size * y];
+		};
+
+		Terrain.prototype.set = function(x, y, val) {
+			this.map[x + this.size * y] = val;
+		};
+
+		Terrain.prototype.generate = function(roughness) {
+			var self = this;
+
+			this.set(0, 0, self.max);
+			this.set(this.max, 0, self.max / 2);
+			this.set(this.max, this.max, 0);
+			this.set(0, this.max, self.max / 2);
+
+			divide(this.max);
+
+			function divide(size) {
+				var x, y, half = size / 2;
+				var scale = roughness * size;
+				if (half < 1) return;
+
+				for (y = half; y < self.max; y += size) {
+					for (x = half; x < self.max; x += size) {
+						square(x, y, half, Math.random() * scale * 2 - scale);
+					}
+				}
+				for (y = 0; y <= self.max; y += half) {
+					for (x = (y + half) % size; x <= self.max; x += size) {
+						diamond(x, y, half, Math.random() * scale * 2 - scale);
+					}
+				}
+				
+				divide(size / 2);
+			}
+
+			function average(values) {
+				var valid = values.filter(function(val) { return val !== -1; });
+				var total = valid.reduce(function(sum, val) { return sum + val; }, 0);
+				return total / valid.length;
+			}
+
+			function square(x, y, size, offset) {
+				var ave = average([
+					self.get(x - size, y - size),   // upper left
+					self.get(x + size, y - size),   // upper right
+					self.get(x + size, y + size),   // lower right
+					self.get(x - size, y + size)    // lower left
+				]);
+				self.set(x, y, ave + offset);
+			}
+
+			function diamond(x, y, size, offset) {
+				var ave = average([
+					self.get(x, y - size),      // top
+					self.get(x + size, y),      // right
+					self.get(x, y + size),      // bottom
+					self.get(x - size, y)       // left
+				]);
+				self.set(x, y, ave + offset);
+			}
+		};		
+		
+		function addBlock(x, y, z) {
+			grid.add(
+				Object({
+					x: x,
+					y: y,
+					z: z,
+					type: "cube",
+					cubeSize: Master.camera.cubeSize,
+					colour: Colours.random("greens")
+				})
+			);
+		}
+		
+		function addColumn(x, y, height) {
+			for (var counter = 0; counter < height; counter++) {
+				addBlock(x, y, counter);
+			}
+		}
+
+		var terrain = new Terrain();
+		terrain.generate(0.7);
+		
+		for (var counter1 = 0, length = grid.size; counter1 < length; counter1++) {
+			for (var counter2 = 0, length = grid.size; counter2 < length; counter2++) {
+				addColumn(counter1, counter2, terrain.get(counter1, counter2));
+			}
+		}
+		
+		console.log(terrain.map);
 		
 		Pause.off();
 		

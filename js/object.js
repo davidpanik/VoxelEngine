@@ -1,7 +1,10 @@
+// CREATE AN INDIVIDUAL OBJECT THAT CAN EXIST WITHIN THE WORLD (E.G. A CUBE)
+
 var Object = function(preferences) {
 	time.start("object.create");
 	
 	var object = {
+		// Default values
 		type:      "cube",
 		x:         0,
 		y:         0,
@@ -13,6 +16,7 @@ var Object = function(preferences) {
 		breakable: false,
 		floating:  false,
 		
+		// Attributes used by Obelisk for rendering
 		obelisk: {
 			colour:     {},
 			dimension:  {},
@@ -20,7 +24,9 @@ var Object = function(preferences) {
 			p3d:        {}
 		},
 		
+		// Set the colour of this object
 		setColour: function() {
+			// Rather than specifying colours of edges and individual surfaces, we just set one base colour and then work out the rest based on the primitive type
 			switch (this.type) {
 				case "cube":
 					this.obelisk.colour = new obelisk.CubeColor().getByHorizontalColor(combineColourOpacity(this.colour, this.opacity));
@@ -51,9 +57,11 @@ var Object = function(preferences) {
 			return this;
 		},
 		
+		// Set the dimensions of this object (default is 1x1x1)
 		setDimension: function(cubeSize) {
 			if (cubeSize) this.cubeSize = cubeSize;
 			
+			// Again, slightly different function required for different primitive types
 			switch (this.type) {
 				case "cube":
 					this.obelisk.dimension = new obelisk.CubeDimension(this.cubeSize * this.size, this.cubeSize * this.size, this.cubeSize * this.size);
@@ -84,6 +92,7 @@ var Object = function(preferences) {
 			return this;
 		},
 		
+		// Create the Obelisk primite object (this is actual thing that will be drawn to screen)
 		setPrimitive: function() {
 			switch (this.type) {
 				case "cube":
@@ -114,13 +123,14 @@ var Object = function(preferences) {
 			return this;
 		},
 		
+		// The 3D point (location) of the object (x, y, z)
 		setP3d: function() {
 			this.obelisk.p3d = new obelisk.Point3D(this.x * this.cubeSize, this.y * this.cubeSize, this.z * this.cubeSize);
 		
 			return this;
 		},
 
-
+		// Draw this object to the canvas
 		render: function() {
 			time.start("object.render");
 
@@ -133,11 +143,13 @@ var Object = function(preferences) {
 			return this;
 		},
 		
+		// Work if this object can/should fall downwads
 		gravity: function() {
 			time.start("object.gravity");
 			
-			if (this.z > 0 && !this.floating) { // Has room to fall
-				this.move(0, 0, -1);
+			// Object can fall (!floating) and has room below to fall)
+			if (this.z > 0 && !this.floating) {
+				this.move(0, 0, -1); // Move downwards by one
 				time.stop("object.gravity");
 				return true;
 			}
@@ -147,10 +159,13 @@ var Object = function(preferences) {
 			return false;
 		},
 		
+		// Relocate an object by a set amount
 		move: function(xDir, yDir, zDir) {
 			time.start("object.move");
 			
+			// Ensure the new location is empty
 			if (!Master.grid.find(this.x + xDir, this.y + yDir, this.z + zDir)) {
+				// Set the new co-ordinates
 				this.x += xDir;
 				this.y += yDir;
 				this.z += zDir;
@@ -166,6 +181,7 @@ var Object = function(preferences) {
 			return this;
 		},
 		
+		// Reposition this object based on the direction it is being viewed from
 		rotate: function(rotation) {
 			time.start("object.rotate");
 			
@@ -173,6 +189,7 @@ var Object = function(preferences) {
 				rotatedX = this.x,
 				rotatedY = this.y;
 
+			// Do some simple co-ordinate switching, rather than a matrix transform
 			if (rotation === 0) {
 				rotatedX = this.x;
 				rotatedY = this.y;
@@ -187,6 +204,7 @@ var Object = function(preferences) {
 				rotatedY = this.x * -1;
 			}
 			
+			// Set the new co-ordinates
 			this.x = rotatedX;
 			this.y = rotatedY;						
 
@@ -196,10 +214,12 @@ var Object = function(preferences) {
 		}
 	};
 	
+	// Override the object's defaults with any prefrences passed in
 	for (var x in preferences) {
 		object[x] = preferences[x];
 	}
 	
+	// Set the basic elements of the object
 	object
 	.setColour()
 	.setDimension()
